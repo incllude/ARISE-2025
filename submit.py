@@ -17,12 +17,13 @@ def predict_scores(cfg, model, dataloader, device):
     with torch.no_grad():
         for batch in dataloader:
             batch = {key: value.to(device) for key, value in batch.items()}
-            outputs = model(batch["image"])
+            outputs = model(batch["image"].to(model.dtype))
             jsn_scores = outputs["jsn"].argmax(dim=1).cpu().numpy()  # Probability of positive class
             erosion_scores = outputs["erosion"].argmax(dim=1).cpu().numpy()  # Probability of positive class
 
             for i in range(len(batch["image"])):
                 results.append({
+                    "ID": f'{int(batch["patient_id"][i].item())}_{int(batch["joint_id"][i].item())}',
                     "patient_id": int(batch["patient_id"][i].item()),
                     "joint_id": int(batch["joint_id"][i].item()),
                     "xcenter": batch["xcenter"][i].item(),
@@ -31,6 +32,7 @@ def predict_scores(cfg, model, dataloader, device):
                     "dy": batch["dy"][i].item(),
                     "jsn_score": int(jsn_scores[i]),
                     "erosion_score": int(erosion_scores[i]),
+                    "PAD": 0.0
                 })
     return results
 

@@ -143,7 +143,7 @@ Replace /path/to/arise-2025 with the absolute path to the root directory of the 
 
 ## Training
 
-As a baseline, we present a pipeline combining **YOLOv12s** for joint localization and **ResNet50** for pathology assessment.
+As a baseline, we present a pipeline combining **YOLOv12s** for joint localization and **ConvNeXT-tiny** for pathology assessment.
 
 ### Preprocessing for Detection Model
 
@@ -180,12 +180,15 @@ chmod +x preprocess_for_classifier.sh
 3. Run the training script:
 
 ```bash
-python classifier/train.py
+chmod +x train.sh
+./train.sh
 ```
 
 ---
 
 ## Evaluate and Submit
+
+To get access to pretrained models download [archive](https://disk.yandex.ru/d/pzH8D9CdwX6u0w) and unzip it to `checkpoints` directory.
 
 ### Detection
 

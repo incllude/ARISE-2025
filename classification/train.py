@@ -14,8 +14,33 @@ from tqdm import tqdm
 from metrics import calculate_accuracy
 from data_utils.datasets import initialize_data
 from classification.utils import save_checkpoint
+from accelerate.utils import set_seed
+import torch.nn.functional as F
+import monai
 
+
+set_seed(43)
+monai.utils.set_determinism(seed=43)
 accelerator = Accelerator()
+
+
+class FocalLoss(nn.Module):
+    
+    def __init__(self, gamma=2, weights=None):
+        super().__init__()
+        
+        self.gamma = gamma
+        self.weights = weights
+        self.ce_loss = nn.CrossEntropyLoss(reduction='none')
+        
+    def forward(self, inputs, targets):
+        
+        ce_loss = self.ce_loss(inputs, targets)
+        pt = torch.exp(-ce_loss)
+        weights = self.weights.to(inputs.device).gather(0, targets.view(-1))
+        loss = weights * (1-pt)**self.gamma * ce_loss
+
+        return loss.sum() / weights.sum()
 
 
 def train_epoch(cfg, model, train_loader, optimizer, criterion_erosion, criterion_jsn, accelerator):
@@ -23,6 +48,7 @@ def train_epoch(cfg, model, train_loader, optimizer, criterion_erosion, criterio
     total_loss = 0.0
     for batch in tqdm(train_loader, desc="Training"):
         img, erosion_score, jsn_score = batch
+        img = img.double()
         
         outputs = model(img)
         
@@ -61,6 +87,7 @@ def validate_epoch(cfg, model, val_loader, criterion_erosion, criterion_jsn, acc
     with torch.no_grad():
         for batch in tqdm(val_loader, desc="Validation"):
             img, erosion_score, jsn_score = batch
+            img = img.double()
             
             outputs = model(img)
             
@@ -100,13 +127,19 @@ def main(cfg: DictConfig):
         os.environ["WANDB_API_KEY"] = cfg.wandb.api_key
         wandb.init(project=cfg.wandb.project, config=OmegaConf.to_container(cfg, resolve=True))
 
-    model = instantiate(cfg.model)
-    optimizer = instantiate(cfg.optimizer, params=model.parameters())
+    model = instantiate(cfg.model).double()
+
+    
+    # optimizer = instantiate(cfg.optimizer, params=model.parameters())
+    optimizer = eval(cfg.optimizer._target_)([
+        {"params": model.heads.parameters(), "lr": cfg.optimizer.head_lr, "weight_decay": cfg.optimizer.weight_decay},
+        {"params": model.backbone.parameters(), "lr": cfg.optimizer.lr, "weight_decay": cfg.optimizer.weight_decay}
+    ])
     scheduler = instantiate(cfg.scheduler, optimizer=optimizer)
     train_loader, val_loader = initialize_data(cfg)
 
-    criterion_erosion = nn.CrossEntropyLoss(weight=torch.FloatTensor(cfg.training.normalized_erosion_class_weights).cuda())
-    criterion_jsn = nn.CrossEntropyLoss(weight=torch.FloatTensor(cfg.training.normalized_jsn_class_weights).cuda())
+    criterion_erosion = nn.CrossEntropyLoss(weight=torch.tensor(cfg.training.normalized_erosion_class_weights).double().cuda())
+    criterion_jsn = nn.CrossEntropyLoss(weight=torch.tensor(cfg.training.normalized_jsn_class_weights).double().cuda())
     
     model, optimizer, train_loader, val_loader = accelerator.prepare(
         model, optimizer, train_loader, val_loader

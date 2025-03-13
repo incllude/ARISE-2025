@@ -1,5 +1,5 @@
 _target_: data_utils.datasets.ImageClassificationDataset
-img_dir: "/data/classifier_data/val"
+img_dir: "/kaggle/working/data/classifier_data/val"
 transform:
   _target_: torchvision.transforms.Compose
   transforms:
