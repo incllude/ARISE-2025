@@ -90,9 +90,9 @@ class EvalImageDataset(Dataset):
 
     def __getitem__(self, idx):
         image_path, patient_id, joint_id, xcenter, ycenter, dx, dy = self.samples[idx]
-
+        image = Image.open(image_path).convert("RGB")
         if self.transform:
-            image = self.transform(image_path)
+            image = self.transform(image)
         return {
             "image": image,
             "patient_id": patient_id,
