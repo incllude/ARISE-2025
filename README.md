@@ -12,46 +12,6 @@ The goal is to develop a robust and efficient pipeline that can assist clinician
 
 ---
 
-## Evaluation Metrics
-
-The performance of the models will be evaluated using the following metrics:
-
-### 1. **Intersection over Union (IoU)**
-IoU measures the overlap between the predicted bounding box and the ground truth bounding box. It is defined as:
-
-$$
-\text{IoU} = \frac{\text{Area of Overlap}}{\text{Area of Union}}
-$$
-
-- **Area of Overlap**: The region where the predicted and ground truth bounding boxes intersect.
-- **Area of Union**: The total area covered by both the predicted and ground truth bounding boxes.
-
-A higher IoU indicates better localization accuracy.
-
----
-
-### 2. **Balanced Accuracy**
-Balanced Accuracy is a metric used to evaluate the performance of a classification model, especially in cases where the classes are imbalanced. It is the average of recall (sensitivity) obtained on each class, ensuring that the performance metric is not biased toward the majority class.
-
-Balanced Accuracy is defined as:
-
-$$
-\text{Balanced Accuracy} = \frac{1}{2} \left( \frac{\text{True Positives (TP)}}{\text{True Positives (TP)} + \text{False Negatives (FN)}} + \frac{\text{True Negatives (TN)}}{\text{True Negatives (TN)} + \text{False Positives (FP)}} \right)
-$$
-
----
-
-### 3. **Final Metric: IoU × Accuracy**
-The final evaluation metric is the product of **IoU** and **Accuracy**. This combined metric ensures that models achieve both precise localization and accurate pathology assessment. It is defined as:
-
-$$
-\text{Final Metric} = \text{IoU} \times \text{Accuracy}
-$$
-
-The final score ranges between 0 and 1, where higher values indicate better overall performance.
-
----
-
 ## Dataset
 
 Participants will work with a clinical collection of radiographic images annotated for joint localization, erosion, and JSN. The dataset includes:
@@ -90,46 +50,7 @@ Participants will work with a clinical collection of radiographic images annotat
   - The bounding box coordinates are **not normalized** and should be normalized to the image dimensions (values between 0 and 1).
   - The rows are already sorted in the required order. You need to **recursively number** each row from `0` to `41` to create the `joint_id` column.
 
----
-
-## Expected Outcomes
-
-Participants are expected to develop a pipeline that:
-1. Accurately localizes hand joints in radiographic images.
-2. Assesses the severity of erosion and JSN with high precision.
-3. Demonstrates generalizability and robustness across diverse patient data.
-
-The winning solutions will be those that achieve the highest performance on the evaluation metrics while providing interpretable and clinically relevant results.
-
----
-
-## Important Notes for Preprocessing and Submission
-
-### 1. **Handling Multiple Expert Scores**
-- For each joint in the `scores.csv` file, there are three entries with scores from three different experts. It is recommended to use the **average value** as the ground truth. This averaging is already implemented in the repository's preprocessing code. If you use a different preprocessing approach, ensure that you average the scores accordingly.
-
-### 2. **Submission File Format (`submit.csv`)**
-- Each image must have exactly **100 rows** in the `submit.csv` file. If there are fewer than 100 joints for a patient, pad the remaining rows with empty values.
-- Padding rows should have the following format:
-  - `PAD` column set to `1`.
-  - All other columns (`joint_id`, `xcenter`, `ycenter`, `dx`, `dy`, `jsn_score`, `erosion_score`) set to `none` (str 'none', not empty value!).
-
-#### Example of Padding Rows:
-| ID      | patient_id | joint_id | xcenter | ycenter | dx   | dy   | jsn_score | erosion_score | PAD |
-|---------|------------|----------|---------|---------|------|------|-----------|---------------|-----|
-| 6_48    | 6          | none     | none    | none    | none | none | none      | none          | 1.0 |
-
-#### Example of Predicted Rows:
-| ID      | patient_id | joint_id | xcenter            | ycenter            | dx                | dy                | jsn_score | erosion_score | PAD |
-|---------|------------|----------|--------------------|--------------------|-------------------|-------------------|-----------|---------------|-----|
-| 1_14    | 6          | 14       | 0.8670480847358704 | 0.2998411357402801 | 0.0537742339074611 | 0.0342460758984088 | 2         | 0             | 0.0 |
-
-- The `ID` column should follow the format: `{patient_id}_{joint_index}` (e.g., `1_14` for the 14th joint of patient 1.
-- __You are not required to follow a specific numbering scheme for joint IDs__. However, each patient must have exactly 100 unique IDs in the submission file to meet Kaggle's processing requirements. Matching joints to ground truth will be handled automatically using Intersection over Union (IoU).
-- __Bounding box coordinates (xcenter, ycenter, dx, dy) must be normalized to the image dimensions, meaning all values must be between 0 and 1__.
----
-
-# Baseline Solution
+# Solution
 
 ### Troubleshooting Import Issues
 
@@ -217,16 +138,3 @@ python data_utils/crop_eval.py --image_dir /path/to/image/jpeg --bbox_txt /path/
 ```bash
 python submit.py
 ```
-
----
-
-## Submission File Requirements
-
-- Ensure the `submit.csv` file adheres to the specified format.
-- Normalize bounding box coordinates (`xcenter`, `ycenter`, `dx`, `dy`) to the image dimensions, meaning all values must be between **0 and 1**.
-- Include exactly 100 rows per image, padding with empty rows if necessary.
-- Use the `PAD` column to indicate padding rows (`1` for padding, `0` for predicted rows).
-- **ID System**:
-  - Each patient must have exactly 100 unique IDs in the format `{patient_id}_{joint_index}` (e.g., `1_14` for the 14th joint of patient 1).
-  - You are not required to follow a specific numbering scheme for joint IDs, but the IDs must be unique for each patient.
-  - Matching joints to ground truth will be handled automatically using Intersection over Union (IoU).
