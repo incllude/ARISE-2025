@@ -109,7 +109,7 @@ chmod +x train.sh
 
 ## Evaluate and Submit
 
-To get access to pretrained models download [archive](https://disk.yandex.ru/d/pzH8D9CdwX6u0w) and unzip it to `checkpoints` directory.
+To get access to pretrained models download [checkpoints]([https://disk.yandex.ru/d/pzH8D9CdwX6u0w](https://disk.yandex.ru/d/248Lqj2MtlYPgw)) and unzip it to `checkpoints` directory.
 
 ### Detection
 
