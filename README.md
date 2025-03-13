@@ -64,7 +64,7 @@ Replace /path/to/arise-2025 with the absolute path to the root directory of the 
 
 ## Training
 
-As a baseline, we present a pipeline combining **YOLOv12s** for joint localization and **ConvNeXT-tiny** for pathology assessment.
+As a baseline, we present a pipeline combining **YOLOv12s** for joint localization and **ConvNeXT-small** for pathology assessment.
 
 ### Preprocessing for Detection Model
 

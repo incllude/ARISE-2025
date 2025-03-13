@@ -1,8 +1,7 @@
 _target_: classification.models.timms.timm_Model
-model_name: "timm/convnext_tiny.in12k"
+model_name: "timm/convnext_small.in12k_ft_in1k"
 n_output_layers: 2
 output_layers_shapes:
   6: "erosion"
   5: "jsn"
 pretrained: True
-drop_rate: 0.1
