@@ -14,10 +14,12 @@ from data_utils.datasets import EvalImageDataset
 
 def predict_scores(cfg, model, dataloader, device):
     results = []
+    first_param = next(model.parameters())
+    dtype = first_param.dtype
     with torch.no_grad():
         for batch in dataloader:
             batch = {key: value.to(device) for key, value in batch.items()}
-            outputs = model(batch["image"].to(model.dtype))
+            outputs = model(batch["image"].to(dtype))
             jsn_scores = outputs["jsn"].argmax(dim=1).cpu().numpy()  # Probability of positive class
             erosion_scores = outputs["erosion"].argmax(dim=1).cpu().numpy()  # Probability of positive class
 
