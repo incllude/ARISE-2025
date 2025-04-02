@@ -1,5 +1,8 @@
 # ARISE-2025: Automated Rheumatoid Inflammatory Scoring and Evaluation
 
+<img width="1248" alt="image" src="https://github.com/user-attachments/assets/fd49301e-463c-4ee8-a375-c067d1c71575" />
+
+
 ## Task Description
 
 Rheumatoid arthritis (RA) is a chronic autoimmune disease characterized by inflammation, joint destruction, and extra-articular manifestations. Radiography is the standard imaging modality for diagnosing and monitoring joint damage in RA. However, traditional methods for evaluating radiographic progression, such as the Sharp method and its variants, are time-consuming and subjective. This hackathon focuses on developing automated solutions for joint assessment in RA using computer vision techniques.
